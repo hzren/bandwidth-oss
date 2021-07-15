@@ -1,0 +1,15 @@
+{
+  "localSocksPort": "20070",
+  "localHttpPort": "20080",
+  "serverHost": "--服务器公网IP--",
+  "serverPort": "--服务器公网端口--",
+  "secretKey": "--服务器客户端握手token--",
+  "serverBindIp": "--服务器绑定的内网IP，可以直接使用0.0.0.0--",
+  "serverBindPort": "--服务器内网端口--",
+  "ucloudOssPublicKey": "--你的ucloud oss 公钥--",
+  "ucloudOssPrivateKey": "--你的ucloud oss 私钥--",
+  "ucloudOssBucketName": "--你的ucloud oss bucket名称--",
+  "ucloudOssPublicHost": "--你的ucloud oss bucket 公网域名--",
+  "ucloudOssPrivateHost": "--你的ucloud oss bucket内网域名，确保和服务器内网可通--",
+  "dnsList": "--dns server IP 列表--"
+}

@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.bandwidth</groupId>
+    <artifactId>bandwidth-oss</artifactId>
+    <version>0.77</version>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.63.Final</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/cn.ucloud.ufile/ufile-client-java -->
+        <dependency>
+            <groupId>cn.ucloud.ufile</groupId>
+            <artifactId>ufile-client-java</artifactId>
+            <version>2.6.5</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <target>1.8</target>
+                    <source>1.8</source>
+                    <encoding>UTF-8</encoding>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>appassembler-maven-plugin</artifactId>
+                <version>2.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>assemble</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <encoding>{project.build.sourceEncoding}</encoding>
+                    <configurationSourceDirectory>src/main/resources</configurationSourceDirectory>
+                    <configurationDirectory>config</configurationDirectory>
+                    <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                    <programs>
+                        <program>
+                            <id>download</id>
+                            <mainClass>com.bandwidth.proxy.SocksFrontApp</mainClass>
+                            <platforms>
+                                <platform>windows</platform>
+                            </platforms>
+                        </program>
+                        <program>
+                            <id>upload</id>
+                            <mainClass>com.bandwidth.proxy.SocksBackendApp</mainClass>
+                            <platforms>
+                                <platform>unix</platform>
+                            </platforms>
+                            <commandLineArguments>
+                                <commandLineArgument>-server</commandLineArgument>
+                                <commandLineArgument>-Xms75m</commandLineArgument>
+                                <commandLineArgument>-Xmx75m</commandLineArgument>
+                                <commandLineArgument>-XX:+UseCompressedOops</commandLineArgument>
+                                <commandLineArgument>-XX:+UseTLAB</commandLineArgument>
+                                <commandLineArgument>-XX:+UseBiasedLocking</commandLineArgument>
+                                <commandLineArgument>-XX:+UseFastAccessorMethods</commandLineArgument>
+                                <commandLineArgument>-XX:NewRatio=1</commandLineArgument>
+                                <commandLineArgument>-XX:SurvivorRatio=8</commandLineArgument>
+                                <commandLineArgument>-XX:+AggressiveOpts</commandLineArgument>
+                                <commandLineArgument>-XX:CompileThreshold=500</commandLineArgument>
+                                <commandLineArgument>-XX:+UseSerialGC</commandLineArgument>
+                                <commandLineArgument>-XX:+PrintGCDetails</commandLineArgument>
+                                <commandLineArgument>-XX:+PrintGCTimeStamps</commandLineArgument>
+                                <commandLineArgument>-Dio.netty.allocator.type=unpooled</commandLineArgument>
+                                <commandLineArgument>-Djava.net.preferIPv4Stack=true</commandLineArgument>
+                                <commandLineArgument>-Djava.net.preferIPv6Addresses=false</commandLineArgument>
+                            </commandLineArguments>
+                        </program>
+                    </programs>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <descriptor>bin.xml</descriptor>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>native</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.graalvm.nativeimage</groupId>
+                    <artifactId>svm</artifactId>
+                    <version>20.1.0</version>
+                    <scope>provided</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.graalvm.nativeimage</groupId>
+                        <artifactId>native-image-maven-plugin</artifactId>
+                        <version>20.1.0</version>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>native-image</goal>
+                                </goals>
+                                <phase>package</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <imageName>socksbackend</imageName>
+                            <mainClass>com.bandwidth.proxy.SocksBackendApp</mainClass>
+                            <buildArgs>--enable-all-security-services -H:+ReportUnsupportedElementsAtRuntime
+                                --allow-incomplete-classpath
+                            </buildArgs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <repositories>
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring milestone</name>
+            <url>https://repo.spring.io/milestone</url>
+        </repository>
+        <repository>
+            <id>alimaven</id>
+            <name>aliyun maven</name>
+            <url>http://maven.aliyun.com/nexus/content/groups/public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+</project>
